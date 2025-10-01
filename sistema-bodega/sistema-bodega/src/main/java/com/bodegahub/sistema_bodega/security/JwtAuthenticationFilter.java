@@ -44,7 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String role = claims.get("role", String.class);
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                // ✅ CORREGIDO: Crear authorities desde el rol correctamente
+
                 List<SimpleGrantedAuthority> authorities = Collections.singletonList(
                         new SimpleGrantedAuthority("ROLE_" + role)
                 );

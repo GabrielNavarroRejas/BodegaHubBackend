@@ -21,10 +21,13 @@ public class ProductoController {
         this.productoService = productoService;
     }
 
-    // Crear producto en una bodega
+    // Crear producto en una bodega - AHORA CON CÓDIGO DE BARRAS AUTOMÁTICO
     @PostMapping("/bodega/{idBodega}")
-    public Producto crearProducto(@PathVariable Long idBodega, @RequestBody Producto producto) {
-        return productoService.crearProducto(idBodega, producto);
+    public ResponseEntity<Producto> crearProducto(@PathVariable Long idBodega, @RequestBody Producto producto) {
+        // El código de barras se genera automáticamente en el modelo (@PrePersist)
+        // No es necesario enviarlo en el JSON
+        Producto nuevoProducto = productoService.crearProducto(idBodega, producto);
+        return ResponseEntity.ok(nuevoProducto);
     }
 
     @GetMapping
@@ -40,20 +43,32 @@ public class ProductoController {
 
     // Obtener producto por ID
     @GetMapping("/{id}")
-    public Producto obtenerProducto(@PathVariable Long id) {
-        return productoService.obtenerProducto(id).orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+    public ResponseEntity<Producto> obtenerProducto(@PathVariable Long id) {
+        Producto producto = productoService.obtenerProducto(id)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+        return ResponseEntity.ok(producto);
+    }
+
+    // Obtener producto por código de barras
+    @GetMapping("/codigo-barras/{codigoBarras}")
+    public ResponseEntity<Producto> obtenerProductoPorCodigoBarras(@PathVariable String codigoBarras) {
+        Producto producto = productoService.obtenerProductoPorCodigoBarras(codigoBarras)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado con código: " + codigoBarras));
+        return ResponseEntity.ok(producto);
     }
 
     // Actualizar producto
     @PutMapping("/{id}")
-    public Producto actualizarProducto(@PathVariable Long id, @RequestBody Producto producto) {
-        return productoService.actualizarProducto(id, producto);
+    public ResponseEntity<Producto> actualizarProducto(@PathVariable Long id, @RequestBody Producto producto) {
+        Producto productoActualizado = productoService.actualizarProducto(id, producto);
+        return ResponseEntity.ok(productoActualizado);
     }
 
     // Eliminar producto
     @DeleteMapping("/{id}")
-    public void eliminarProducto(@PathVariable Long id) {
+    public ResponseEntity<Void> eliminarProducto(@PathVariable Long id) {
         productoService.eliminarProducto(id);
+        return ResponseEntity.noContent().build();
     }
 
     // Nuevos endpoints con paginación
@@ -91,6 +106,17 @@ public class ProductoController {
 
         return ResponseEntity.ok(productos);
     }
+
+    // Buscar productos por nombre (con paginación)
+    @GetMapping("/buscar")
+    public ResponseEntity<Page<Producto>> buscarProductos(
+            @RequestParam String nombre,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Producto> productos = productoService.buscarProductosPorNombre(nombre, pageable);
+
+        return ResponseEntity.ok(productos);
+    }
 }
-
-

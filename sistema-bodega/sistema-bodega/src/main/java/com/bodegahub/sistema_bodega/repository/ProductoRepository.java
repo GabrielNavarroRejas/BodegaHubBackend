@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ProductoRepository extends JpaRepository<Producto, Long> {
@@ -29,8 +30,9 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
     // Productos por rango de precio con paginación
     Page<Producto> findByPrecioBetween(Double precioMin, Double precioMax, Pageable pageable);
 
+    // NUEVO: Buscar producto por código de barras
+    Optional<Producto> findByCodigoBarras(String codigoBarras);
+
     // Mantener métodos existentes para compatibilidad
     List<Producto> findByBodega(Bodega bodega);
 }
-
-
